@@ -37,8 +37,8 @@
   - 乾淨設計網表：`design1025.v`
   - 注入木馬網表：`design2025_<insertion_point>.v`
 - **標籤檔案 (放置於 `labels/` 目錄)**：
-  - 乾淨設計標籤：`label_1025.json`
-  - 注入木馬設計標籤：`label2025_<insertion_point>.json`
+  - 乾淨設計標籤：`result1025.txt`
+  - 注入木馬設計標籤：`result<insertion_point>.txt`
 
 **多個木馬版本**：
 - 由於一個乾淨設計可能在不同模組注入木馬，我們使用 `<insertion_point>` 來區分。例如，若 Jeb 在 `design1101_rtl.v` 的 `controller` 模組注入木馬，檔案命名為 `design2101_controller_rtl.v`。若他在 `ALU` 模組注入，則命名為 `design2101_ALU_rtl.v`。
