@@ -1,0 +1,15 @@
+Design name: design2101
+Author: Jeb
+
+Trojan design base on: Trojan 5
+Origin RTL hierarchy: multi module
+Insert module: Pong_Top.v
+
+trojan block:
+
+    Trojan Trojan_Inst (
+        .pon_rst_n_i(i_Clk),
+        .prog_dat_i(w_Col_Count),
+        .pc_reg(r_P1_Score),
+        .prog_adr_o(o_Red_Video)
+    );
