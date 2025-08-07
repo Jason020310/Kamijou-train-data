@@ -6,11 +6,9 @@
 ## 目錄結構
 - `rtl/`：存放所有 Verilog 原始程式碼 (RTL)。
   - `candidate/`：**候選程式碼清單**。組員將從這裡挑選設計。
-  - `clean/`：存放已分配編號的**乾淨** Verilog 設計。
-  - `trojaned/`：存放已**注入木馬**的 Verilog 設計。
+  - `designs/`：存放所有已編號的 RTL 設計（包括乾淨與木馬）。
 - `netlist/`：存放閘級網表 (gate-level netlist)。
-  - `clean/`：存放乾淨設計產生的網表。
-  - `trojan/`：存放注入木馬設計產生的網表。
+  - `designs/`：存放所有已編號的網表（包括乾淨與木馬）。
 - `official/`：存放官方提供的 30 個設計 (`design0.v` ~ `design29.v`)。
 - `labels/`：存放所有設計的標籤資料，用於機器學習訓練。
 - `before beta/`：存放專案初期生成的三碼設計與網表，組員無需理會此資料夾。
@@ -29,40 +27,48 @@
 - **Conashin**：`1201` - `1300`
 - **Aslan**：`1301` - `1400`
 
-**命名範例**：
-- **RTL 檔案 (放置於 `rtl/` 目錄)**：
-  - 乾淨設計：`design1025_rtl.v`
-  - 注入木馬設計：`design2025_<insertion_point>_rtl.v`
-- **閘級網表檔案 (放置於 `netlist/` 目錄)**：
-  - 乾淨設計網表：`design1025.v`
-  - 注入木馬網表：`design2025_<insertion_point>.v`
-- **標籤檔案 (放置於 `labels/` 目錄)**：
-  - 乾淨設計標籤：`result1025.txt`
-  - 注入木馬設計標籤：`result<insertion_point>.txt`
-
-**多個木馬版本**：
-- 由於一個乾淨設計可能在不同模組注入木馬，我們使用 `<insertion_point>` 來區分。例如，若 Jeb 在 `design1101_rtl.v` 的 `controller` 模組注入木馬，檔案命名為 `design2101_controller_rtl.v`。若他在 `ALU` 模組注入，則命名為 `design2101_ALU_rtl.v`。
-
-**Top Module 命名規範**：
-- 為了讓 Genus 腳本能夠正確辨識 Top Module，所有設計的 Top Module 名稱必須與其檔案名一致（不含後綴和副檔名）。
-  - 例如，`design1101_rtl.v` 的 Top Module 名稱應為 `design1101`。
-  - `design2101_controller_rtl.v` 的 Top Module 名稱應為 `design2101_controller`。
-- 若設計包含多個 `.v` 檔案，請將它們放在一個與 Top Module 同名的資料夾中，例如 `design1101/`，並在其中包含所有相關檔案。
+**命名規範**：
+- 為了讓 Genus 腳本能夠正確辨識 Top Module，所有設計都必須以一個與其編號同名的資料夾來組織。
+- **資料夾命名**：
+  - `rtl/designs/design1101/`：存放乾淨設計的所有 `.v` 檔案。
+  - `rtl/designs/design2101/`：存放木馬設計的所有 `.v` 檔案。
+- **Top Module 檔案與 Top Module 名稱**：
+  - 在每個 `designxxxx/` 資料夾內，都必須有一個 Top Module 檔案名為 `designxxxx.v`。
+  - 且其內部 Top Module 名稱也必須為 `designxxxx`。
+- **範例**：
+  - `rtl/designs/design1101/` 目錄下的 Top Module 檔案為 `design1101.v`，其內部 Top Module 名稱為 `design1101`。
+  - `rtl/designs/design2101/` 目錄下的 Top Module 檔案為 `design2101.v`，其內部 Top Module 名稱為 `design2101`。
 
 ## 工作流程 
 
 由於時間緊迫，我們將採用精簡的 Git 工作流程。
 
 1.  **Clone 專案**：使用 `git clone` 將專案儲存庫下載到本地。
-2.  **挑選設計**：組員瀏覽 `rtl/candidate/` 中的設計，選擇一個適合的。
+2.  **挑選設計**：組員瀏覽 `rtl/candidate/` 中的設計，並在 `rtl/candidate/README.md` 中註記為已分配。
 3.  **開始工作**：
-    * **複製檔案**：將選定的程式碼複製到 `rtl/clean/` 目錄，並根據你的編號區間，為其分配一個**乾淨**的 `1xxx` 編號。**請務必在檔名後加上 `_rtl.v` 後綴**。
-    * **注入木馬**：在新的 `1xxx` 檔案基礎上，開始注入木馬。
-4.  **命名與放置**：
-    * 乾淨的 `.v` 檔案放置於 `rtl/clean/`。
-    * 注入木馬後的 `.v` 檔案，依照命名規範 (`design2xxx_<insertion_point>_rtl.v`) 命名，並放入 `rtl/trojaned/` 目錄。
-5.  **直接 Commit**：完成後，使用 `git add .` 和 `git commit -m "commit message"` 將你的工作推送到主分支。在 commit 訊息中，請簡要說明你的工作，例如「[Jeb] 注入木馬到 `design1101` 的 `ALU` 模組」。
-6.  **管理員的後續處理 (Jason的責任)**：
-    * 當有新的檔案被提交後，你需要負責將其轉換成網表。
-    * **命名網表**：將產生的網表**不加 `_rtl` 後綴**，例如 `design1101.v` 和 `design2101_ALU.v`，並放入 `netlist/` 相應的目錄中。
-    * **標籤化**：你需要為每個設計（包括乾淨和木馬版本）生成標籤，並放入 `labels/` 目錄，這是機器學習的關鍵步驟。
+    * **建立資料夾**：根據你分配到的編號，在 `rtl/designs/` 中建立一個乾淨設計的資料夾，例如 `design1101/`。
+    * **複製檔案**：將選定的程式碼從 `rtl/candidate/` 複製到 `design1101/`，並將 Top Module 檔案命名為 `design1101.v`。
+    * **注入木馬**：在 `design1101/` 的基礎上，再建立一個木馬設計資料夾，例如 `design2101/`。將木馬程式碼放入其中，並命名 Top Module 檔案為 `design2101.v`。
+4.  **提交變更與記錄**：
+    * 完成後，使用 `git add .` 和 `git commit -m "commit message"` 將你的工作推送到主分支。
+    * **Commit 命名格式**：請務必遵循以下格式：
+      `[編號]-[組員姓名]-[簡短說明]`
+      * **範例**：`1101-Jeb-新增 clean design` 或 `2101-Jeb-插入 Trojan 5`
+    * **`readme.md` 規範**：
+      - 提交木馬設計時，**務必**在該設計的資料夾中新增一個 `readme.md`。
+      - 檔案內容請使用以下範本，並填寫詳細資訊：
+        ```
+        Trojan based: [例如：Trojan 5]
+        Trigger: [例如：當分數達到 10]
+        Payload: [例如：將對手分數重設為 0]
+        Insert module: [例如：Pong_Top.v]
+        ```
+5.  **管理員的後續處理 (Jason的責任)**：
+    * 當有新的檔案被提交後，你需要負責將其轉換成網表，並放入 `netlist/designs/` 相應的資料夾中。
+    * **標籤化**：你需要為每個設計生成標籤，並放入 `labels/` 目錄，這是機器學習的關鍵步驟。
+
+## 聯絡資訊
+- **Jason (專案管理員)**：[你的聯絡方式]
+- Jeb: [Jeb 的聯絡方式]
+- Conashin: [Conashin 的聯絡方式]
+- Aslan: [Aslan 的聯絡方式]

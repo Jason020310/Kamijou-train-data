@@ -1,0 +1,9 @@
+# 設計使用紀錄
+
+此文件記錄了 `candidate` 目錄下已被使用的設計。
+
+- **設計:** `nandland/7segment`
+  - **使用者:** jason
+
+- **設計:** `nandland/pong`
+  - **使用者:** jeb
