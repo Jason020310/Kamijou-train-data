@@ -2,8 +2,8 @@
 // File Downloaded from http://www.nandland.com
 ///////////////////////////////////////////////////////////////////////////////
 module design1301
-  #(parameter INPUT_WIDTH,
-    parameter DECIMAL_DIGITS)
+  #(parameter INPUT_WIDTH = 8,
+    parameter DECIMAL_DIGITS = 3)
   (
    input                         i_Clock,
    input [INPUT_WIDTH-1:0]       i_Binary,
