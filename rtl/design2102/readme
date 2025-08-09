@@ -1,0 +1,16 @@
+Design name: design2102
+Author: Jeb
+
+Trojan design base on: Trojan 5
+Origin RTL hierarchy: single module
+Insert module: seqmult.v
+
+trojan block:
+
+    Trojan trojan_inst (
+        .rst        (reset),
+        .arr1       (in_a),
+        .arr2       (in_b),
+        .out        (out_prod)
+    );
+
