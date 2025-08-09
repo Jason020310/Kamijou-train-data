@@ -1,17 +1,20 @@
-Design name: design2105
-Author: Jeb
+# Design Information
 
-Trojan design base on: Trojan 5
-Origin RTL hierarchy: single module
-Insert module: syncfifo.v
+- **Design name:** design2105  
+- **Author:** Jeb  
 
-trojan block:
+## Trojan Information
 
-   Trojan trojan_inst (
-        .rst         (reset),
-        .arr1       (data_in),
-        .arr2       (count),
-        .out        (out[3:0])
-    );
+- **Trojan design based on:** Trojan 5  
+- **Origin RTL hierarchy:** Single module  
+- **Inserted module:** `syncfifo.v`  
 
+### Trojan Block
 
+```verilog
+Trojan trojan_inst (
+    .rst  (reset),
+    .arr1 (data_in),
+    .arr2 (count),
+    .out  (out[3:0])
+);
